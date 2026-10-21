@@ -130,7 +130,16 @@ void setup() {
   uint8_t telemetry[12] = {'R','E','A','D','Y',' ',' ',' ',0,255,0,0};
   telemetryCharacteristic->setValue(telemetry, sizeof(telemetry));
   service->start();
-  server->getAdvertising()->addServiceUUID(SERVICE_UUID);
+  // PestoLink scans for this service UUID. A 128-bit UUID and the full name
+  // do not both fit in one 31-byte BLE advertisement, so split them.
+  BLEAdvertisementData advertisementData;
+  advertisementData.setFlags(0x06);
+  advertisementData.setCompleteServices(BLEUUID(SERVICE_UUID));
+  BLEAdvertisementData scanResponseData;
+  scanResponseData.setName("RobotMotorTest");
+  BLEAdvertising* advertising = server->getAdvertising();
+  advertising->setAdvertisementData(advertisementData);
+  advertising->setScanResponseData(scanResponseData);
   server->startAdvertising();
   digitalWrite(SLEEP_PIN, HIGH);
   Serial.println("PestoLink ready: RobotMotorTest");
