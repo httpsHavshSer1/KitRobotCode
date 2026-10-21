@@ -22,21 +22,19 @@ In the PlatformIO sidebar (alien-head icon), expand **Project Tasks**, then expa
 | `encoder` | `src/RobotEncoderTest.cpp` | Print encoder position over serial |
 | `imu_native` | `src/RobotImuNativeTest.cpp` | Read the IMU directly over I2C |
 | `imu_library` | `src/RobotIMUTest.cpp` | Read the IMU through the SparkFun library |
-| `motor` | `src/RobotMotorTest.cpp` | Drive motors and servo with PestoLink |
+| `motor` | `src/RobotMotorTest.cpp` | Check the PestoLink Bluetooth connection and button 0 |
 
 The regular PlatformIO toolbar Upload button uses `motor`, the current default environment. To upload another test, use **Project Tasks → that environment → General → Upload**. Each upload replaces the program previously on the ESP32.
 
 Open **Project Tasks → that environment → General → Monitor** for serial output. The monitor speed is 115200 baud.
 
-## PestoLink motor control
+## PestoLink connection test
 
-Upload the `motor` environment, then open [PestoLink](https://pestol.ink/) and connect to the BLE device named **RobotMotorTest**. The first joystick drives forward/backward and steers the motors. Hold **button 0** to move the servo down or **button 1** to move it up on GPIO 25. Releasing both buttons holds its angle; pressing both at once also holds it. The servo starts at 90 degrees and moves one degree every 20 ms while a button is held, within 0–180 degrees.
-
-The firmware stops both motors and stops moving the servo when Bluetooth disconnects or valid gamepad packets stop for 500 ms. The motor fault input on GPIO 36 must have an external pull-up; a low fault signal also stops both motors. Power the servo from a supply rated for its load and connect that supply's ground to the ESP32 ground.
+Upload the `motor` environment, then connect to **ESP32 Test** in PestoLink. This simple test uses the official `PestoLink-Receive` library. Press button 0; the Serial Monitor prints `Button A was pressed` once per press. It does not drive the motors or servo.
 
 PestoLink's [project page](https://github.com/AlfredoSystems/PestoLink-Online#browser-support) lists supported browser options, including iPhone guidance.
 
-If PestoLink stays on **Searching for robots**, first upload the latest `motor` environment and reset the ESP32. Open the `motor` Serial Monitor at 115200 baud. Wait for `PestoLink ready: RobotMotorTest (BLE advertising started)`; `PestoLink BLE configuring...` alone does not mean the radio is advertising. If it reports a BLE failure, note the number shown. Turn on Bluetooth on the phone or computer, and allow Bluetooth permission for the app. On iPhone, use the PestoLink app or the Bluefy browser; Safari does not provide the needed Web Bluetooth support. The BLE device is named **RobotMotorTest**, and the robot must be powered while scanning.
+If PestoLink stays on **Searching for robots**, check that the ESP32 is powered and that the `motor` upload succeeded. Turn on Bluetooth and allow Bluetooth permission for the app. If the Serial Monitor repeatedly shows `Running on single core variant of a chip, but app is built with multi-core support`, the selected board/framework does not match the chip and the program never reaches Bluetooth setup. That startup error must be resolved before testing PestoLink.
 
 ## Source layout
 
