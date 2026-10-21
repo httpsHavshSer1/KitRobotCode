@@ -36,7 +36,7 @@ The firmware stops both motors and stops moving the servo when Bluetooth disconn
 
 PestoLink's [project page](https://github.com/AlfredoSystems/PestoLink-Online#browser-support) lists supported browser options, including iPhone guidance.
 
-If PestoLink stays on **Searching for robots**, first upload the latest `motor` environment and reset the ESP32. Open the `motor` Serial Monitor at 115200 baud and check for `PestoLink ready: RobotMotorTest`. Turn on Bluetooth on the phone or computer, and allow Bluetooth permission for the app. On iPhone, use the PestoLink app or the Bluefy browser; Safari does not provide the needed Web Bluetooth support. The BLE device is named **RobotMotorTest**, and the robot must be powered while scanning.
+If PestoLink stays on **Searching for robots**, first upload the latest `motor` environment and reset the ESP32. Open the `motor` Serial Monitor at 115200 baud. Wait for `PestoLink ready: RobotMotorTest (BLE advertising started)`; `PestoLink BLE configuring...` alone does not mean the radio is advertising. If it reports a BLE failure, note the number shown. Turn on Bluetooth on the phone or computer, and allow Bluetooth permission for the app. On iPhone, use the PestoLink app or the Bluefy browser; Safari does not provide the needed Web Bluetooth support. The BLE device is named **RobotMotorTest**, and the robot must be powered while scanning.
 
 ## Source layout
 

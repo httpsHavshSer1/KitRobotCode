@@ -35,6 +35,19 @@ uint8_t requestedButtons = 0;
 BLECharacteristic* telemetryCharacteristic = nullptr;
 Servo armServo;
 int servoAngle = 90;
+volatile int advertisementDataStatus = -1;
+volatile int scanResponseStatus = -1;
+volatile int advertisingStartStatus = -1;
+
+void onBleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t* param) {
+  if (event == ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT) {
+    advertisementDataStatus = param->adv_data_raw_cmpl.status;
+  } else if (event == ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT) {
+    scanResponseStatus = param->scan_rsp_data_raw_cmpl.status;
+  } else if (event == ESP_GAP_BLE_ADV_START_COMPLETE_EVT) {
+    advertisingStartStatus = param->adv_start_cmpl.status;
+  }
+}
 
 float clampPower(float value) {
   if (value > 1.0f) return 1.0f;
@@ -138,14 +151,38 @@ void setup() {
   BLEAdvertisementData scanResponseData;
   scanResponseData.setName("RobotMotorTest");
   BLEAdvertising* advertising = server->getAdvertising();
+  BLEDevice::setCustomGapHandler(onBleGapEvent);
   advertising->setAdvertisementData(advertisementData);
   advertising->setScanResponseData(scanResponseData);
-  server->startAdvertising();
   digitalWrite(SLEEP_PIN, HIGH);
-  Serial.println("PestoLink ready: RobotMotorTest");
+  Serial.println("PestoLink BLE configuring...");
 }
 
 void loop() {
+  // ESP32 applies both advertising payloads asynchronously. Start the radio
+  // only after the controller confirms that both are configured.
+  static bool advertisingRequested = false;
+  static bool advertisingResultPrinted = false;
+  if (advertisementDataStatus >= 0 && scanResponseStatus >= 0 &&
+      !advertisingRequested) {
+    advertisingRequested = true;
+    if (advertisementDataStatus == ESP_BT_STATUS_SUCCESS &&
+        scanResponseStatus == ESP_BT_STATUS_SUCCESS) {
+      BLEDevice::getAdvertising()->start();
+    } else {
+      Serial.printf("PestoLink BLE data failed: advertisement=%d scan=%d\n",
+                    advertisementDataStatus, scanResponseStatus);
+    }
+  }
+  if (advertisingStartStatus >= 0 && !advertisingResultPrinted) {
+    advertisingResultPrinted = true;
+    if (advertisingStartStatus == ESP_BT_STATUS_SUCCESS) {
+      Serial.println("PestoLink ready: RobotMotorTest (BLE advertising started)");
+    } else {
+      Serial.printf("PestoLink BLE advertising failed: %d\n",
+                    advertisingStartStatus);
+    }
+  }
   float m1;
   float m2;
   uint32_t last;
