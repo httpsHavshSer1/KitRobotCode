@@ -22,7 +22,7 @@ In the PlatformIO sidebar (alien-head icon), expand **Project Tasks**, then expa
 | `encoder` | `src/RobotEncoderTest.cpp` | Print encoder position over serial |
 | `imu_native` | `src/RobotImuNativeTest.cpp` | Read the IMU directly over I2C |
 | `imu_library` | `src/RobotIMUTest.cpp` | Read the IMU through the SparkFun library |
-| `motor` | `src/RobotMotorTest.cpp` | Control the motors with PestoLink |
+| `motor` | `src/RobotMotorTest.cpp` | Drive motors and servo with PestoLink |
 
 The regular PlatformIO toolbar Upload button uses `motor`, the current default environment. To upload another test, use **Project Tasks → that environment → General → Upload**. Each upload replaces the program previously on the ESP32.
 
@@ -30,7 +30,9 @@ Open **Project Tasks → that environment → General → Monitor** for serial o
 
 ## PestoLink motor control
 
-Upload the `motor` environment, then open [PestoLink](https://pestol.ink/) and connect to the BLE device named **RobotMotorTest**. PestoLink's first joystick axes control forward/backward motion and steering. The firmware stops both motors when Bluetooth disconnects or valid gamepad packets stop for 500 ms. The motor fault input on GPIO 36 must have an external pull-up; a low fault signal also stops both motors.
+Upload the `motor` environment, then open [PestoLink](https://pestol.ink/) and connect to the BLE device named **RobotMotorTest**. The first joystick drives forward/backward and steers the motors. Hold **button 0** to move the servo down or **button 1** to move it up on GPIO 25. Releasing both buttons holds its angle; pressing both at once also holds it. The servo starts at 90 degrees and moves one degree every 20 ms while a button is held, within 0–180 degrees.
+
+The firmware stops both motors and stops moving the servo when Bluetooth disconnects or valid gamepad packets stop for 500 ms. The motor fault input on GPIO 36 must have an external pull-up; a low fault signal also stops both motors. Power the servo from a supply rated for its load and connect that supply's ground to the ESP32 ground.
 
 PestoLink's [project page](https://github.com/AlfredoSystems/PestoLink-Online#browser-support) lists supported browser options, including iPhone guidance.
 
